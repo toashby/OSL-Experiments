@@ -1,0 +1,127 @@
+#define nSpheres 9 
+struct sphere{point pos; float radius; color col;};
+
+shader rays(
+    float  frame= 1.0,
+    output color Color = 0,
+    output color Alpha = 0)
+{ 
+    float nearestT;
+    vector hitP;
+
+    point CamPos;//get the camera position
+    float L;
+    if (raytype("camera")){
+        getattribute("path:ray_length", L);
+        CamPos=L*I+P;
+    }
+
+    color sunMaterial(point hp){
+        return color(noise("perlin", hp*10, 10)+0.9, noise("perlin", hp*10, frame)+0.3, 0.01);
+    }
+    
+    color mercuryMaterial(point hp){
+        return color(noise("perlin", hp*5, 10)+0.3);
+    }
+    
+    color venusMaterial(point hp){
+        return color(noise("perlin", hp*10, 10)+0.4, noise("perlin", hp*10, 10)+0.4, noise("perlin", hp*10, 10));
+    }
+    
+    color earthMaterial(point hp){
+        if(noise("perlin", hp*5, 17) < 0.1){
+            return color(0.1, 0.1, 0.7);
+        }
+        return color(0.1, 0.75, 0.1);   
+    }
+    
+    color marsMaterial(point hp){
+        if(noise("perlin", (hp)*5.0) < 0.1){
+            return color(0.5, 0.1, 0.1);
+        }
+        return color(0.35, 0.05, 0.06);   
+    }
+    
+    color jupiterMaterial(point hp){
+        return color(0.4, 0.14, 0.06);
+    }
+    
+    color saturnMaterial(point hp){
+        return color(0.45, 0.2, 0.08);
+    }
+    
+    color uranusMaterial(point hp){
+        return color(0.08, 0.1, 0.9);
+    }
+    
+    color neptuneMaterial(point hp){
+        return color(noise("hash", hp), noise("hash", hp), 0.9);
+    }
+
+    sphere s1; s1.pos = point(0,0,0); s1.radius = 1.5; //sun
+    
+    sphere s2; s2.pos = point(sin(frame)*3,cos(frame)*3,0); s2.radius = 0.3; //define some spheres Mercury
+    sphere s3; s3.pos = point(sin(frame*1.2)*4.5,cos(frame*1.2)*4.5,0); s3.radius = 0.35; //Venus
+    sphere s4; s4.pos = point(sin(frame*2.3)*6,cos(frame*2.3)*6,0); s4.radius = 0.5; //Earth
+    sphere s5; s5.pos = point(sin(frame*1.4)*7.5,cos(frame*1.4)*7.5,0); s5.radius = 0.4; //Mars
+    sphere s6; s6.pos = point(sin(frame*2.5)*9,cos(frame*2.5)*9,0); s6.radius = 0.7; //Jupiter
+    sphere s7; s7.pos = point(sin(frame*1.6)*10.5,cos(frame*1.6)*10.5,0); s7.radius = 0.55; //Saturn
+    sphere s8; s8.pos = point(sin(frame*-2.8)*12,cos(frame*-2.8)*12,0); s8.radius = 0.63; //Uranus
+    sphere s9; s9.pos = point(sin(frame*1.9)*13.5,cos(frame*1.9)*13.5,0); s9.radius = 0.4; //Neptune
+
+    sphere spheres[nSpheres];
+    spheres[0] = s1;
+    spheres[1] = s2;
+    spheres[2] = s3;
+    spheres[3] = s4;
+    spheres[4] = s5;
+    spheres[5] = s6;
+    spheres[6] = s7;
+    spheres[7] = s8;
+    spheres[8] = s9;
+
+    float qHit(point p, vector d, sphere s){ //query hit function
+        vector m = p - s.pos;
+        float b = dot(m, d);
+        float c = dot(m, m) - (s.radius * s.radius);
+        if(c > 0.0 && b > 0.0){ //pointing away
+            return 0;
+        }
+        float discr = b*b - c;
+        if(discr < 0.0){ //miss
+            return 0;
+        }
+        float nearestT = -b - sqrt(discr);
+        hitP = p + nearestT * d; 
+        return nearestT; //ray intersects
+    }
+
+    //Color = color(0.01,0.01,0.02); //background colour
+    Alpha = 0;
+
+    float wasHit;
+    float tempHit = 999999999;
+    int closestRec;
+    for(int i = 0; i < nSpheres; ++i){//find closest t here
+        wasHit = qHit(CamPos, -I, spheres[i]);
+        if(wasHit < tempHit && wasHit > 0){
+            tempHit = wasHit;
+            closestRec = i;
+
+            color matList[nSpheres]; //declare materials here
+            matList[0] = sunMaterial(hitP);
+            matList[1] = mercuryMaterial(hitP - s2.pos);
+            matList[2] = venusMaterial(hitP - s3.pos);
+            matList[3] = earthMaterial(hitP - s4.pos);
+            matList[4] = marsMaterial(hitP - s5.pos);
+            matList[5] = jupiterMaterial(hitP);
+            matList[6] = saturnMaterial(hitP);
+            matList[7] = uranusMaterial(hitP);
+            matList[8] = neptuneMaterial(hitP);
+
+            Color = matList[i];
+            
+            Alpha = 1;
+        }
+    }
+}
