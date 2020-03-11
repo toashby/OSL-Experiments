@@ -1,0 +1,1137 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.9.9
+# options: -o /tmp/tmp5j0l9w7g.oso -I/snap/blender/36/2.82/scripts/addons/cycles/shader
+shader Example
+oparam	color	COLOR	0 0 0		%read{2147483647,-1} %write{421,421}
+param	float	MAX_DIST	1000		%read{80,407} %write{2147483647,-1}
+param	float	MAX_STEPS	100		%read{16,343} %write{2147483647,-1}
+param	float	SURFACE_DIST	0.001		%read{77,404} %write{2147483647,-1}
+param	vector	LIGHT_POS	1.5 5.8000002 6		%read{91,415} %write{2147483647,-1}
+global	point	P	%read{11,11} %write{2147483647,-1}
+global	vector	I	%read{10,88} %write{2147483647,-1}
+local	color	hit_color	%read{335,335} %write{0,413}
+local	struct sphere[1]	spheres	%read{23,350} %write{2147483647,-1}
+local	float[1]	spheres.m_radius	%read{16,413} %write{4,4} %mystruct{spheres} %mystructfield{0}
+local	vector[1]	spheres.m_position	%read{16,413} %write{5,5} %mystruct{spheres} %mystructfield{1}
+local	color[1]	spheres.m_color	%read{16,413} %write{6,6} %mystruct{spheres} %mystructfield{2}
+local	point	CamPos	%read{16,89} %write{11,11}
+local	float	L	%read{10,10} %write{9,9}
+local	vector	___349_tp	%read{16,413} %write{16,413}
+local	float	___349_line_dist	%read{16,413} %write{16,413}
+local	float	___351_closest_dist	%read{16,413} %write{16,413}
+local	int	___352_i	%read{16,413} %write{16,413}
+local	float	___353_d	%read{16,413} %write{16,413}
+local	float	___351_plane_dist	%read{16,413} %write{16,413}
+local	float	___351_cap_dist	%read{16,413} %write{16,413}
+local	float	___351_box_dist	%read{16,413} %write{16,413}
+local	float	___358_d	%read{329,329} %write{150,150}
+local	vector	___358_e	%read{154,154} %write{151,151}
+local	vector	___358_f	%read{212,212} %write{152,152}
+local	vector	___358_g	%read{270,270} %write{153,153}
+local	vector	___358_n	%read{330,330} %write{329,329}
+local	float	___359_dist_to_origin	%read{16,414} %write{13,413}
+local	int	___360_j	%read{16,413} %write{15,413}
+local	vector	___361_march_edge	%read{16,413} %write{16,413}
+local	float	___361_ds	%read{16,413} %write{16,413}
+local	vector	___362_li	%read{331,413} %write{92,92}
+local	vector	___362_norm	%read{331,336} %write{330,330}
+local	color	___362_diff	%read{419,420} %write{335,419}
+local	float	___362_dist_to_light	%read{417,417} %write{414,414}
+local	float	d	%read{88,88} %write{87,87}
+local	vector	pp	%read{91,415} %write{89,89}
+local	color	diff	%read{421,421} %write{420,420}
+const	color	$const1	1 0 0		%read{0,0} %write{2147483647,-1}
+temp	float	$tmp1.m_radius	%read{4,4} %write{1,1}
+temp	vector	$tmp1.m_position	%read{5,5} %write{2,2}
+temp	color	$tmp1.m_color	%read{6,6} %write{3,3}
+const	float	$const2	0.1		%read{1,1} %write{2147483647,-1}
+const	vector	$const3	0.2 0.2 0.2		%read{2,2} %write{2147483647,-1}
+const	vector	$const4	0 1 0		%read{3,3} %write{2147483647,-1}
+const	int	$const5	0		%read{4,408} %write{2147483647,-1}
+temp	int	$tmp2	%read{8,8} %write{7,7}
+const	string	$const6	"camera"		%read{7,7} %write{2147483647,-1}
+temp	int	$tmp3	%read{2147483647,-1} %write{9,9}
+const	string	$const7	"path:ray_length"		%read{9,9} %write{2147483647,-1}
+temp	vector	$tmp4	%read{11,11} %write{10,10}
+const	string	$const8	"rayMarch"		%read{12,339} %write{2147483647,-1}
+temp	int	$tmp5	%read{14,86} %write{15,86}
+temp	vector	$tmp6	%read{16,86} %write{16,86}
+const	string	$const9	"getDist"		%read{19,346} %write{2147483647,-1}
+const	int	$const10	2147483647		%read{20,347} %write{2147483647,-1}
+temp	int	$tmp7	%read{16,86} %write{16,86}
+temp	int	$tmp8	%read{16,86} %write{16,86}
+temp	float	$tmp9	%read{16,86} %write{16,86}
+temp	vector	$tmp10	%read{16,86} %write{16,86}
+const	float	$const11	0.40000001		%read{26,355} %write{2147483647,-1}
+const	string	$const12	"mod"		%read{25,352} %write{2147483647,-1}
+temp	vector	$tmp11	%read{16,86} %write{16,86}
+temp	vector	$tmp12	%read{16,86} %write{16,86}
+temp	vector	$tmp13	%read{16,86} %write{16,86}
+temp	vector	$tmp14	%read{16,86} %write{16,86}
+temp	float	$tmp15	%read{16,86} %write{16,86}
+temp	int	$tmp16	%read{16,86} %write{16,86}
+temp	color	$tmp17	%read{16,86} %write{16,86}
+const	int	$const13	1		%read{40,413} %write{2147483647,-1}
+temp	int	$tmp18	%read{2147483647,-1} %write{16,86}
+temp	float	$tmp19	%read{16,86} %write{16,86}
+const	float	$const14	0.25		%read{42,419} %write{2147483647,-1}
+temp	int	$tmp20	%read{16,86} %write{16,86}
+const	color	$const15	0.1 0.40000001 0.1		%read{46,373} %write{2147483647,-1}
+const	vector	$const16	0 0.2 -0.2		%read{47,374} %write{2147483647,-1}
+temp	vector	$tmp22	%read{16,86} %write{16,86}
+const	float	$const17	0.15000001		%read{53,380} %write{2147483647,-1}
+const	float	$const18	0.050000001		%read{58,385} %write{2147483647,-1}
+const	string	$const19	"capsuleSDF"		%read{48,375} %write{2147483647,-1}
+temp	float	$tmp23	%read{16,86} %write{16,86}
+temp	float	$tmp24	%read{16,86} %write{16,86}
+temp	float	$tmp25	%read{16,86} %write{16,86}
+const	float	$const20	0		%read{54,395} %write{2147483647,-1}
+const	string	$const21	"clamp"		%read{52,379} %write{2147483647,-1}
+temp	float	$tmp26	%read{16,86} %write{16,86}
+temp	float	$tmp27	%read{16,86} %write{16,86}
+temp	float	$tmp28	%read{16,86} %write{16,86}
+temp	int	$tmp29	%read{16,86} %write{16,86}
+const	color	$const22	0.80000001 0.2 0.1		%read{63,390} %write{2147483647,-1}
+const	vector	$const23	-0.30000001 -0.15000001 0.2		%read{64,391} %write{2147483647,-1}
+temp	vector	$tmp31	%read{16,86} %write{16,86}
+const	vector	$const24	0.1 0.1 0.1		%read{67,394} %write{2147483647,-1}
+const	string	$const25	"boxSDF"		%read{65,392} %write{2147483647,-1}
+temp	color	$tmp33	%read{16,86} %write{16,86}
+temp	vector	$tmp34	%read{16,86} %write{16,86}
+temp	vector	$tmp35	%read{16,86} %write{16,86}
+temp	color	$tmp36	%read{16,86} %write{16,86}
+temp	int	$tmp37	%read{16,86} %write{16,86}
+const	color	$const26	0.1 0.30000001 0.30000001		%read{74,401} %write{2147483647,-1}
+temp	int	$tmp38	%read{16,86} %write{16,86}
+temp	int	$tmp39	%read{16,86} %write{16,86}
+temp	int	$tmp40	%read{16,86} %write{16,86}
+temp	int	$tmp41	%read{16,86} %write{16,86}
+temp	int	$tmp42	%read{2147483647,-1} %write{16,86}
+temp	vector	$tmp43	%read{89,89} %write{88,88}
+const	string	$const27	"getLight"		%read{90,90} %write{2147483647,-1}
+temp	vector	$tmp44	%read{92,92} %write{91,91}
+const	string	$const28	"getNormal"		%read{93,93} %write{2147483647,-1}
+temp	int	$tmp45	%read{98,115} %write{98,115}
+temp	int	$tmp46	%read{96,115} %write{97,115}
+temp	float	$tmp47	%read{98,115} %write{98,115}
+temp	vector	$tmp48	%read{98,115} %write{98,115}
+temp	vector	$tmp49	%read{98,115} %write{98,115}
+temp	vector	$tmp50	%read{98,115} %write{98,115}
+temp	vector	$tmp51	%read{98,115} %write{98,115}
+temp	vector	$tmp52	%read{98,115} %write{98,115}
+temp	float	$tmp53	%read{98,115} %write{98,115}
+temp	int	$tmp54	%read{98,115} %write{98,115}
+temp	color	$tmp55	%read{98,115} %write{98,115}
+temp	int	$tmp56	%read{2147483647,-1} %write{98,115}
+temp	float	$tmp57	%read{117,117} %write{116,116}
+temp	int	$tmp58	%read{119,119} %write{118,118}
+temp	vector	$tmp60	%read{124,126} %write{122,122}
+temp	float	$tmp61	%read{130,130} %write{125,125}
+temp	float	$tmp62	%read{130,130} %write{129,129}
+temp	float	$tmp63	%read{128,128} %write{126,126}
+temp	float	$tmp64	%read{129,129} %write{128,128}
+temp	float	$tmp65	%read{131,131} %write{130,130}
+temp	float	$tmp66	%read{133,133} %write{132,132}
+temp	int	$tmp67	%read{136,136} %write{135,135}
+temp	vector	$tmp69	%read{141,141} %write{139,139}
+temp	color	$tmp71	%read{145,145} %write{144,144}
+temp	vector	$tmp72	%read{142,142} %write{141,141}
+temp	vector	$tmp73	%read{144,144} %write{142,142}
+temp	color	$tmp74	%read{144,144} %write{143,143}
+temp	int	$tmp75	%read{147,147} %write{146,146}
+const	vector	$const29	0.0099999998 0 0		%read{151,151} %write{2147483647,-1}
+const	vector	$const30	0 0.0099999998 0		%read{152,152} %write{2147483647,-1}
+const	vector	$const31	0 0 0.0099999998		%read{153,153} %write{2147483647,-1}
+temp	vector	$tmp76	%read{329,329} %write{328,328}
+temp	float	$tmp77	%read{328,328} %write{211,211}
+temp	vector	$tmp78	%read{159,200} %write{154,154}
+temp	int	$tmp79	%read{159,176} %write{159,176}
+temp	int	$tmp80	%read{157,176} %write{158,176}
+temp	float	$tmp81	%read{159,176} %write{159,176}
+temp	vector	$tmp82	%read{159,176} %write{159,176}
+temp	vector	$tmp83	%read{159,176} %write{159,176}
+temp	vector	$tmp84	%read{159,176} %write{159,176}
+temp	vector	$tmp85	%read{159,176} %write{159,176}
+temp	vector	$tmp86	%read{159,176} %write{159,176}
+temp	float	$tmp87	%read{159,176} %write{159,176}
+temp	int	$tmp88	%read{159,176} %write{159,176}
+temp	color	$tmp89	%read{159,176} %write{159,176}
+temp	int	$tmp90	%read{2147483647,-1} %write{159,176}
+temp	float	$tmp91	%read{178,178} %write{177,177}
+temp	int	$tmp92	%read{180,180} %write{179,179}
+temp	vector	$tmp94	%read{185,187} %write{183,183}
+temp	float	$tmp95	%read{191,191} %write{186,186}
+temp	float	$tmp96	%read{191,191} %write{190,190}
+temp	float	$tmp97	%read{189,189} %write{187,187}
+temp	float	$tmp98	%read{190,190} %write{189,189}
+temp	float	$tmp99	%read{192,192} %write{191,191}
+temp	float	$tmp100	%read{194,194} %write{193,193}
+temp	int	$tmp101	%read{197,197} %write{196,196}
+temp	vector	$tmp103	%read{202,202} %write{200,200}
+temp	color	$tmp105	%read{206,206} %write{205,205}
+temp	vector	$tmp106	%read{203,203} %write{202,202}
+temp	vector	$tmp107	%read{205,205} %write{203,203}
+temp	color	$tmp108	%read{205,205} %write{204,204}
+temp	int	$tmp109	%read{208,208} %write{207,207}
+temp	float	$tmp110	%read{328,328} %write{269,269}
+temp	vector	$tmp111	%read{217,258} %write{212,212}
+temp	int	$tmp112	%read{217,234} %write{217,234}
+temp	int	$tmp113	%read{215,234} %write{216,234}
+temp	float	$tmp114	%read{217,234} %write{217,234}
+temp	vector	$tmp115	%read{217,234} %write{217,234}
+temp	vector	$tmp116	%read{217,234} %write{217,234}
+temp	vector	$tmp117	%read{217,234} %write{217,234}
+temp	vector	$tmp118	%read{217,234} %write{217,234}
+temp	vector	$tmp119	%read{217,234} %write{217,234}
+temp	float	$tmp120	%read{217,234} %write{217,234}
+temp	int	$tmp121	%read{217,234} %write{217,234}
+temp	color	$tmp122	%read{217,234} %write{217,234}
+temp	int	$tmp123	%read{2147483647,-1} %write{217,234}
+temp	float	$tmp124	%read{236,236} %write{235,235}
+temp	int	$tmp125	%read{238,238} %write{237,237}
+temp	vector	$tmp127	%read{243,245} %write{241,241}
+temp	float	$tmp128	%read{249,249} %write{244,244}
+temp	float	$tmp129	%read{249,249} %write{248,248}
+temp	float	$tmp130	%read{247,247} %write{245,245}
+temp	float	$tmp131	%read{248,248} %write{247,247}
+temp	float	$tmp132	%read{250,250} %write{249,249}
+temp	float	$tmp133	%read{252,252} %write{251,251}
+temp	int	$tmp134	%read{255,255} %write{254,254}
+temp	vector	$tmp136	%read{260,260} %write{258,258}
+temp	color	$tmp138	%read{264,264} %write{263,263}
+temp	vector	$tmp139	%read{261,261} %write{260,260}
+temp	vector	$tmp140	%read{263,263} %write{261,261}
+temp	color	$tmp141	%read{263,263} %write{262,262}
+temp	int	$tmp142	%read{266,266} %write{265,265}
+temp	float	$tmp143	%read{328,328} %write{327,327}
+temp	vector	$tmp144	%read{275,316} %write{270,270}
+temp	int	$tmp145	%read{275,292} %write{275,292}
+temp	int	$tmp146	%read{273,292} %write{274,292}
+temp	float	$tmp147	%read{275,292} %write{275,292}
+temp	vector	$tmp148	%read{275,292} %write{275,292}
+temp	vector	$tmp149	%read{275,292} %write{275,292}
+temp	vector	$tmp150	%read{275,292} %write{275,292}
+temp	vector	$tmp151	%read{275,292} %write{275,292}
+temp	vector	$tmp152	%read{275,292} %write{275,292}
+temp	float	$tmp153	%read{275,292} %write{275,292}
+temp	int	$tmp154	%read{275,292} %write{275,292}
+temp	color	$tmp155	%read{275,292} %write{275,292}
+temp	int	$tmp156	%read{2147483647,-1} %write{275,292}
+temp	float	$tmp157	%read{294,294} %write{293,293}
+temp	int	$tmp158	%read{296,296} %write{295,295}
+temp	vector	$tmp160	%read{301,303} %write{299,299}
+temp	float	$tmp161	%read{307,307} %write{302,302}
+temp	float	$tmp162	%read{307,307} %write{306,306}
+temp	float	$tmp163	%read{305,305} %write{303,303}
+temp	float	$tmp164	%read{306,306} %write{305,305}
+temp	float	$tmp165	%read{308,308} %write{307,307}
+temp	float	$tmp166	%read{310,310} %write{309,309}
+temp	int	$tmp167	%read{313,313} %write{312,312}
+temp	vector	$tmp169	%read{318,318} %write{316,316}
+temp	color	$tmp171	%read{322,322} %write{321,321}
+temp	vector	$tmp172	%read{319,319} %write{318,318}
+temp	vector	$tmp173	%read{321,321} %write{319,319}
+temp	color	$tmp174	%read{321,321} %write{320,320}
+temp	int	$tmp175	%read{324,324} %write{323,323}
+temp	float	$tmp176	%read{335,335} %write{334,334}
+temp	float	$tmp177	%read{333,333} %write{331,331}
+const	float	$const32	1		%read{333,333} %write{2147483647,-1}
+temp	float	$tmp178	%read{334,334} %write{333,333}
+temp	vector	$tmp179	%read{337,337} %write{336,336}
+const	float	$const33	2		%read{337,337} %write{2147483647,-1}
+temp	vector	$tmp180	%read{338,338} %write{337,337}
+temp	vector	$tmp181	%read{343,413} %write{338,338}
+temp	int	$tmp182	%read{341,413} %write{342,413}
+temp	vector	$tmp183	%read{343,413} %write{343,413}
+temp	int	$tmp184	%read{343,413} %write{343,413}
+temp	int	$tmp185	%read{343,413} %write{343,413}
+temp	float	$tmp186	%read{343,413} %write{343,413}
+temp	vector	$tmp187	%read{343,413} %write{343,413}
+temp	vector	$tmp188	%read{343,413} %write{343,413}
+temp	vector	$tmp189	%read{343,413} %write{343,413}
+temp	vector	$tmp190	%read{343,413} %write{343,413}
+temp	vector	$tmp191	%read{343,413} %write{343,413}
+temp	float	$tmp192	%read{343,413} %write{343,413}
+temp	int	$tmp193	%read{343,413} %write{343,413}
+temp	color	$tmp194	%read{343,413} %write{343,413}
+temp	int	$tmp195	%read{2147483647,-1} %write{343,413}
+temp	float	$tmp196	%read{343,413} %write{343,413}
+temp	int	$tmp197	%read{343,413} %write{343,413}
+temp	vector	$tmp199	%read{343,413} %write{343,413}
+temp	float	$tmp200	%read{343,413} %write{343,413}
+temp	float	$tmp201	%read{343,413} %write{343,413}
+temp	float	$tmp202	%read{343,413} %write{343,413}
+temp	float	$tmp203	%read{343,413} %write{343,413}
+temp	float	$tmp204	%read{343,413} %write{343,413}
+temp	float	$tmp205	%read{343,413} %write{343,413}
+temp	int	$tmp206	%read{343,413} %write{343,413}
+temp	vector	$tmp208	%read{343,413} %write{343,413}
+temp	color	$tmp210	%read{343,413} %write{343,413}
+temp	vector	$tmp211	%read{343,413} %write{343,413}
+temp	vector	$tmp212	%read{343,413} %write{343,413}
+temp	color	$tmp213	%read{343,413} %write{343,413}
+temp	int	$tmp214	%read{343,413} %write{343,413}
+temp	int	$tmp215	%read{343,413} %write{343,413}
+temp	int	$tmp216	%read{343,413} %write{343,413}
+temp	int	$tmp217	%read{343,413} %write{343,413}
+temp	int	$tmp218	%read{343,413} %write{343,413}
+temp	int	$tmp219	%read{2147483647,-1} %write{343,413}
+temp	float	$tmp220	%read{417,417} %write{416,416}
+temp	vector	$tmp221	%read{416,416} %write{415,415}
+temp	int	$tmp222	%read{418,418} %write{417,417}
+code ___main___
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:18
+# 
+	assign		hit_color $const1 	%filename{"Workspace/OSL-Experiments/OSL/Houdini/march.osl"} %line{18} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:24
+# 
+	assign		$tmp1.m_radius $const2 	%line{24} %argrw{"wr"}
+	assign		$tmp1.m_position $const3 	%argrw{"wr"}
+	assign		$tmp1.m_color $const4 	%argrw{"wr"}
+	aassign		spheres.m_radius $const5 $tmp1.m_radius 	%argrw{"wrr"}
+	aassign		spheres.m_position $const5 $tmp1.m_position 	%argrw{"wrr"}
+	aassign		spheres.m_color $const5 $tmp1.m_color 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:28
+#         getattribute("path:ray_length", L);
+	raytype		$tmp2 $const6 	%line{28} %argrw{"wr"}
+	if		$tmp2 12 12 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:29
+#         CamPos=L*I+P;
+	getattribute	$tmp3 $const7 L 	%line{29} %argrw{"wrw"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:30
+#     }
+	mul		$tmp4 L I 	%line{30} %argrw{"wrr"}
+	add		CamPos $tmp4 P 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:129
+#     
+	functioncall	$const8 88 	%line{129} %argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:101
+#         
+	assign		___359_dist_to_origin $const5 	%line{101} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:103
+#             vector march_edge = ray_origin + dist_to_origin * ray_direction;
+	for		$tmp5 16 17 85 87 	%line{103} %argrw{"r"}
+	assign		___360_j $const5 	%argrw{"wr"}
+	lt		$tmp5 ___360_j MAX_STEPS 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:104
+#             float ds = getDist(march_edge);
+	mul		$tmp6 ___359_dist_to_origin I 	%line{104} %argrw{"wrr"}
+	add		___361_march_edge CamPos $tmp6 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:105
+#             dist_to_origin += ds;
+	functioncall	$const9 76 	%line{105} %argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:47
+#         //test
+	assign		___351_closest_dist $const10 	%line{47} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:49
+#             float d = distance(mod(march_edge, 0.4), spheres[i].m_position)-spheres[i].m_radius;
+	for		$tmp8 23 25 39 41 	%line{49} %argrw{"r"}
+	assign		___352_i $const5 	%argrw{"wr"}
+	arraylength	$tmp7 spheres 	%argrw{"wr"}
+	lt		$tmp8 ___352_i $tmp7 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:50
+#             if(closest_dist > d){
+	functioncall	$const12 30 	%line{50} %argrw{"r"}
+# /snap/blender/36/2.82/scripts/addons/cycles/shader/stdosl.h:195
+#   return a - b * floor(a / b);
+	div		$tmp12 ___361_march_edge $const11 	%filename{"/snap/blender/36/2.82/scripts/addons/cycles/shader/stdosl.h"} %line{195} %argrw{"wrr"}
+	floor		$tmp11 $tmp12 	%argrw{"wr"}
+	mul		$tmp13 $const11 $tmp11 	%argrw{"wrr"}
+	sub		$tmp10 ___361_march_edge $tmp13 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:50
+#             if(closest_dist > d){
+	aref		$tmp14 spheres.m_position ___352_i 	%filename{"Workspace/OSL-Experiments/OSL/Houdini/march.osl"} %line{50} %argrw{"wrr"}
+	distance	$tmp9 $tmp10 $tmp14 	%argrw{"wrr"}
+	aref		$tmp15 spheres.m_radius ___352_i 	%argrw{"wrr"}
+	sub		___353_d $tmp9 $tmp15 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:51
+#                 closest_dist = d;
+	gt		$tmp16 ___351_closest_dist ___353_d 	%line{51} %argrw{"wrr"}
+	if		$tmp16 39 39 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:52
+#                 hit_color = spheres[i].m_color;
+	assign		___351_closest_dist ___353_d 	%line{52} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:53
+#             }
+	aref		$tmp17 spheres.m_color ___352_i 	%line{53} %argrw{"wrr"}
+	assign		hit_color $tmp17 	%argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:49
+#             float d = distance(mod(march_edge, 0.4), spheres[i].m_position)-spheres[i].m_radius;
+	assign		$tmp18 ___352_i 	%line{49} %argrw{"wr"}
+	add		___352_i ___352_i $const13 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:57
+#         
+	compref		$tmp19 ___361_march_edge $const13 	%line{57} %argrw{"wrr"}
+	add		___351_plane_dist $tmp19 $const14 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:60
+#             closest_dist = plane_dist;
+	lt		$tmp20 ___351_plane_dist ___351_closest_dist 	%line{60} %argrw{"wrr"}
+	if		$tmp20 47 47 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:61
+#             hit_color = color(0.1, 0.4, 0.1);
+	assign		___351_closest_dist ___351_plane_dist 	%line{61} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:62
+#         }
+	assign		hit_color $const15 	%line{62} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:69
+#         if(cap_dist < closest_dist){
+	sub		$tmp22 ___361_march_edge $const16 	%line{69} %argrw{"wrr"}
+	functioncall	$const19 60 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:35
+#         tp[1] -= clamp(p[1], 0.0, h); 
+	assign		___349_tp $tmp22 	%line{35} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:36
+#         float line_dist = length(tp) - r;
+	compref		$tmp23 ___349_tp $const13 	%line{36} %argrw{"wrr"}
+	compref		$tmp25 $tmp22 $const13 	%argrw{"wrr"}
+	functioncall	$const21 55 	%argrw{"r"}
+# /snap/blender/36/2.82/scripts/addons/cycles/shader/stdosl.h:231
+#   return max(min(x, maxval), minval);
+	min		$tmp26 $tmp25 $const17 	%filename{"/snap/blender/36/2.82/scripts/addons/cycles/shader/stdosl.h"} %line{231} %argrw{"wrr"}
+	max		$tmp24 $tmp26 $const20 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:36
+#         float line_dist = length(tp) - r;
+	sub		$tmp27 $tmp23 $tmp24 	%filename{"Workspace/OSL-Experiments/OSL/Houdini/march.osl"} %line{36} %argrw{"wrr"}
+	compassign	___349_tp $const13 $tmp27 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:37
+#         return line_dist;
+	length		$tmp28 ___349_tp 	%line{37} %argrw{"wr"}
+	sub		___349_line_dist $tmp28 $const18 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:38
+#     }
+	assign		___351_cap_dist ___349_line_dist 	%line{38} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:70
+#             closest_dist = cap_dist;
+	lt		$tmp29 ___351_cap_dist ___351_closest_dist 	%line{70} %argrw{"wrr"}
+	if		$tmp29 64 64 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:71
+#             hit_color = color(0.8, 0.2, 0.1);
+	assign		___351_closest_dist ___351_cap_dist 	%line{71} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:72
+#         } 
+	assign		hit_color $const22 	%line{72} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:76
+#         if(box_dist < closest_dist){
+	sub		$tmp31 ___361_march_edge $const23 	%line{76} %argrw{"wrr"}
+	functioncall	$const25 71 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:42
+#     }
+	abs		$tmp34 $tmp31 	%line{42} %argrw{"wr"}
+	sub		$tmp35 $tmp34 $const24 	%argrw{"wrr"}
+	assign		$tmp36 $const20 	%argrw{"wr"}
+	max		$tmp33 $tmp35 $tmp36 	%argrw{"wrr"}
+	length		___351_box_dist $tmp33 	%argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:77
+#             closest_dist = box_dist;
+	lt		$tmp37 ___351_box_dist ___351_closest_dist 	%line{77} %argrw{"wrr"}
+	if		$tmp37 75 75 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:78
+#             hit_color = color(0.1, 0.3, 0.3);
+	assign		___351_closest_dist ___351_box_dist 	%line{78} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:79
+#         } 
+	assign		hit_color $const26 	%line{79} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:83
+#     }
+	assign		___361_ds ___351_closest_dist 	%line{83} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:106
+#         
+	add		___359_dist_to_origin ___359_dist_to_origin ___361_ds 	%line{106} %argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:108
+#         }
+	lt		$tmp38 ___361_ds SURFACE_DIST 	%line{108} %argrw{"wrr"}
+	neq		$tmp39 $tmp38 $const5 	%argrw{"wrr"}
+	if		$tmp39 80 83 	%argrw{"r"}
+	gt		$tmp40 ___359_dist_to_origin MAX_DIST 	%argrw{"wrr"}
+	neq		$tmp41 $tmp40 $const5 	%argrw{"wrr"}
+	assign		$tmp39 $tmp41 	%argrw{"wr"}
+	if		$tmp39 85 85 	%argrw{"r"}
+	break
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:103
+#             vector march_edge = ray_origin + dist_to_origin * ray_direction;
+	assign		$tmp42 ___360_j 	%line{103} %argrw{"wr"}
+	add		___360_j ___360_j $const13 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:111
+#     }
+	assign		d ___359_dist_to_origin 	%line{111} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:132
+#     color diff = getLight(pp);
+	mul		$tmp43 I d 	%line{132} %argrw{"wrr"}
+	add		pp CamPos $tmp43 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:133
+#     
+	functioncall	$const27 421 	%line{133} %argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:116
+#         vector norm = getNormal(p); //get a hacky normal at hit point
+	sub		$tmp44 LIGHT_POS pp 	%line{116} %argrw{"wrr"}
+	normalize	___362_li $tmp44 	%argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:117
+#         
+	functioncall	$const28 331 	%line{117} %argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:89
+#         vector e = vector(.01, 0, 0); //Does osl support swizzle?
+	functioncall	$const9 151 	%line{89} %argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:47
+#         //test
+	assign		___351_closest_dist $const10 	%line{47} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:49
+#             float d = distance(mod(march_edge, 0.4), spheres[i].m_position)-spheres[i].m_radius;
+	for		$tmp46 98 100 114 116 	%line{49} %argrw{"r"}
+	assign		___352_i $const5 	%argrw{"wr"}
+	arraylength	$tmp45 spheres 	%argrw{"wr"}
+	lt		$tmp46 ___352_i $tmp45 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:50
+#             if(closest_dist > d){
+	functioncall	$const12 105 	%line{50} %argrw{"r"}
+# /snap/blender/36/2.82/scripts/addons/cycles/shader/stdosl.h:195
+#   return a - b * floor(a / b);
+	div		$tmp50 pp $const11 	%filename{"/snap/blender/36/2.82/scripts/addons/cycles/shader/stdosl.h"} %line{195} %argrw{"wrr"}
+	floor		$tmp49 $tmp50 	%argrw{"wr"}
+	mul		$tmp51 $const11 $tmp49 	%argrw{"wrr"}
+	sub		$tmp48 pp $tmp51 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:50
+#             if(closest_dist > d){
+	aref		$tmp52 spheres.m_position ___352_i 	%filename{"Workspace/OSL-Experiments/OSL/Houdini/march.osl"} %line{50} %argrw{"wrr"}
+	distance	$tmp47 $tmp48 $tmp52 	%argrw{"wrr"}
+	aref		$tmp53 spheres.m_radius ___352_i 	%argrw{"wrr"}
+	sub		___353_d $tmp47 $tmp53 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:51
+#                 closest_dist = d;
+	gt		$tmp54 ___351_closest_dist ___353_d 	%line{51} %argrw{"wrr"}
+	if		$tmp54 114 114 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:52
+#                 hit_color = spheres[i].m_color;
+	assign		___351_closest_dist ___353_d 	%line{52} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:53
+#             }
+	aref		$tmp55 spheres.m_color ___352_i 	%line{53} %argrw{"wrr"}
+	assign		hit_color $tmp55 	%argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:49
+#             float d = distance(mod(march_edge, 0.4), spheres[i].m_position)-spheres[i].m_radius;
+	assign		$tmp56 ___352_i 	%line{49} %argrw{"wr"}
+	add		___352_i ___352_i $const13 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:57
+#         
+	compref		$tmp57 pp $const13 	%line{57} %argrw{"wrr"}
+	add		___351_plane_dist $tmp57 $const14 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:60
+#             closest_dist = plane_dist;
+	lt		$tmp58 ___351_plane_dist ___351_closest_dist 	%line{60} %argrw{"wrr"}
+	if		$tmp58 122 122 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:61
+#             hit_color = color(0.1, 0.4, 0.1);
+	assign		___351_closest_dist ___351_plane_dist 	%line{61} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:62
+#         }
+	assign		hit_color $const15 	%line{62} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:69
+#         if(cap_dist < closest_dist){
+	sub		$tmp60 pp $const16 	%line{69} %argrw{"wrr"}
+	functioncall	$const19 135 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:35
+#         tp[1] -= clamp(p[1], 0.0, h); 
+	assign		___349_tp $tmp60 	%line{35} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:36
+#         float line_dist = length(tp) - r;
+	compref		$tmp61 ___349_tp $const13 	%line{36} %argrw{"wrr"}
+	compref		$tmp63 $tmp60 $const13 	%argrw{"wrr"}
+	functioncall	$const21 130 	%argrw{"r"}
+# /snap/blender/36/2.82/scripts/addons/cycles/shader/stdosl.h:231
+#   return max(min(x, maxval), minval);
+	min		$tmp64 $tmp63 $const17 	%filename{"/snap/blender/36/2.82/scripts/addons/cycles/shader/stdosl.h"} %line{231} %argrw{"wrr"}
+	max		$tmp62 $tmp64 $const20 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:36
+#         float line_dist = length(tp) - r;
+	sub		$tmp65 $tmp61 $tmp62 	%filename{"Workspace/OSL-Experiments/OSL/Houdini/march.osl"} %line{36} %argrw{"wrr"}
+	compassign	___349_tp $const13 $tmp65 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:37
+#         return line_dist;
+	length		$tmp66 ___349_tp 	%line{37} %argrw{"wr"}
+	sub		___349_line_dist $tmp66 $const18 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:38
+#     }
+	assign		___351_cap_dist ___349_line_dist 	%line{38} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:70
+#             closest_dist = cap_dist;
+	lt		$tmp67 ___351_cap_dist ___351_closest_dist 	%line{70} %argrw{"wrr"}
+	if		$tmp67 139 139 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:71
+#             hit_color = color(0.8, 0.2, 0.1);
+	assign		___351_closest_dist ___351_cap_dist 	%line{71} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:72
+#         } 
+	assign		hit_color $const22 	%line{72} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:76
+#         if(box_dist < closest_dist){
+	sub		$tmp69 pp $const23 	%line{76} %argrw{"wrr"}
+	functioncall	$const25 146 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:42
+#     }
+	abs		$tmp72 $tmp69 	%line{42} %argrw{"wr"}
+	sub		$tmp73 $tmp72 $const24 	%argrw{"wrr"}
+	assign		$tmp74 $const20 	%argrw{"wr"}
+	max		$tmp71 $tmp73 $tmp74 	%argrw{"wrr"}
+	length		___351_box_dist $tmp71 	%argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:77
+#             closest_dist = box_dist;
+	lt		$tmp75 ___351_box_dist ___351_closest_dist 	%line{77} %argrw{"wrr"}
+	if		$tmp75 150 150 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:78
+#             hit_color = color(0.1, 0.3, 0.3);
+	assign		___351_closest_dist ___351_box_dist 	%line{78} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:79
+#         } 
+	assign		hit_color $const26 	%line{79} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:83
+#     }
+	assign		___358_d ___351_closest_dist 	%line{83} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:90
+#         vector f = vector(0, .01, 0);
+	assign		___358_e $const29 	%line{90} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:91
+#         vector g = vector(0, 0, .01);
+	assign		___358_f $const30 	%line{91} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:92
+# 
+	assign		___358_g $const31 	%line{92} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:94
+#         return normalize(n);
+	sub		$tmp78 pp ___358_e 	%line{94} %argrw{"wrr"}
+	functioncall	$const9 212 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:47
+#         //test
+	assign		___351_closest_dist $const10 	%line{47} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:49
+#             float d = distance(mod(march_edge, 0.4), spheres[i].m_position)-spheres[i].m_radius;
+	for		$tmp80 159 161 175 177 	%line{49} %argrw{"r"}
+	assign		___352_i $const5 	%argrw{"wr"}
+	arraylength	$tmp79 spheres 	%argrw{"wr"}
+	lt		$tmp80 ___352_i $tmp79 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:50
+#             if(closest_dist > d){
+	functioncall	$const12 166 	%line{50} %argrw{"r"}
+# /snap/blender/36/2.82/scripts/addons/cycles/shader/stdosl.h:195
+#   return a - b * floor(a / b);
+	div		$tmp84 $tmp78 $const11 	%filename{"/snap/blender/36/2.82/scripts/addons/cycles/shader/stdosl.h"} %line{195} %argrw{"wrr"}
+	floor		$tmp83 $tmp84 	%argrw{"wr"}
+	mul		$tmp85 $const11 $tmp83 	%argrw{"wrr"}
+	sub		$tmp82 $tmp78 $tmp85 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:50
+#             if(closest_dist > d){
+	aref		$tmp86 spheres.m_position ___352_i 	%filename{"Workspace/OSL-Experiments/OSL/Houdini/march.osl"} %line{50} %argrw{"wrr"}
+	distance	$tmp81 $tmp82 $tmp86 	%argrw{"wrr"}
+	aref		$tmp87 spheres.m_radius ___352_i 	%argrw{"wrr"}
+	sub		___353_d $tmp81 $tmp87 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:51
+#                 closest_dist = d;
+	gt		$tmp88 ___351_closest_dist ___353_d 	%line{51} %argrw{"wrr"}
+	if		$tmp88 175 175 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:52
+#                 hit_color = spheres[i].m_color;
+	assign		___351_closest_dist ___353_d 	%line{52} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:53
+#             }
+	aref		$tmp89 spheres.m_color ___352_i 	%line{53} %argrw{"wrr"}
+	assign		hit_color $tmp89 	%argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:49
+#             float d = distance(mod(march_edge, 0.4), spheres[i].m_position)-spheres[i].m_radius;
+	assign		$tmp90 ___352_i 	%line{49} %argrw{"wr"}
+	add		___352_i ___352_i $const13 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:57
+#         
+	compref		$tmp91 $tmp78 $const13 	%line{57} %argrw{"wrr"}
+	add		___351_plane_dist $tmp91 $const14 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:60
+#             closest_dist = plane_dist;
+	lt		$tmp92 ___351_plane_dist ___351_closest_dist 	%line{60} %argrw{"wrr"}
+	if		$tmp92 183 183 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:61
+#             hit_color = color(0.1, 0.4, 0.1);
+	assign		___351_closest_dist ___351_plane_dist 	%line{61} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:62
+#         }
+	assign		hit_color $const15 	%line{62} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:69
+#         if(cap_dist < closest_dist){
+	sub		$tmp94 $tmp78 $const16 	%line{69} %argrw{"wrr"}
+	functioncall	$const19 196 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:35
+#         tp[1] -= clamp(p[1], 0.0, h); 
+	assign		___349_tp $tmp94 	%line{35} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:36
+#         float line_dist = length(tp) - r;
+	compref		$tmp95 ___349_tp $const13 	%line{36} %argrw{"wrr"}
+	compref		$tmp97 $tmp94 $const13 	%argrw{"wrr"}
+	functioncall	$const21 191 	%argrw{"r"}
+# /snap/blender/36/2.82/scripts/addons/cycles/shader/stdosl.h:231
+#   return max(min(x, maxval), minval);
+	min		$tmp98 $tmp97 $const17 	%filename{"/snap/blender/36/2.82/scripts/addons/cycles/shader/stdosl.h"} %line{231} %argrw{"wrr"}
+	max		$tmp96 $tmp98 $const20 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:36
+#         float line_dist = length(tp) - r;
+	sub		$tmp99 $tmp95 $tmp96 	%filename{"Workspace/OSL-Experiments/OSL/Houdini/march.osl"} %line{36} %argrw{"wrr"}
+	compassign	___349_tp $const13 $tmp99 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:37
+#         return line_dist;
+	length		$tmp100 ___349_tp 	%line{37} %argrw{"wr"}
+	sub		___349_line_dist $tmp100 $const18 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:38
+#     }
+	assign		___351_cap_dist ___349_line_dist 	%line{38} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:70
+#             closest_dist = cap_dist;
+	lt		$tmp101 ___351_cap_dist ___351_closest_dist 	%line{70} %argrw{"wrr"}
+	if		$tmp101 200 200 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:71
+#             hit_color = color(0.8, 0.2, 0.1);
+	assign		___351_closest_dist ___351_cap_dist 	%line{71} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:72
+#         } 
+	assign		hit_color $const22 	%line{72} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:76
+#         if(box_dist < closest_dist){
+	sub		$tmp103 $tmp78 $const23 	%line{76} %argrw{"wrr"}
+	functioncall	$const25 207 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:42
+#     }
+	abs		$tmp106 $tmp103 	%line{42} %argrw{"wr"}
+	sub		$tmp107 $tmp106 $const24 	%argrw{"wrr"}
+	assign		$tmp108 $const20 	%argrw{"wr"}
+	max		$tmp105 $tmp107 $tmp108 	%argrw{"wrr"}
+	length		___351_box_dist $tmp105 	%argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:77
+#             closest_dist = box_dist;
+	lt		$tmp109 ___351_box_dist ___351_closest_dist 	%line{77} %argrw{"wrr"}
+	if		$tmp109 211 211 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:78
+#             hit_color = color(0.1, 0.3, 0.3);
+	assign		___351_closest_dist ___351_box_dist 	%line{78} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:79
+#         } 
+	assign		hit_color $const26 	%line{79} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:83
+#     }
+	assign		$tmp77 ___351_closest_dist 	%line{83} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:94
+#         return normalize(n);
+	sub		$tmp111 pp ___358_f 	%line{94} %argrw{"wrr"}
+	functioncall	$const9 270 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:47
+#         //test
+	assign		___351_closest_dist $const10 	%line{47} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:49
+#             float d = distance(mod(march_edge, 0.4), spheres[i].m_position)-spheres[i].m_radius;
+	for		$tmp113 217 219 233 235 	%line{49} %argrw{"r"}
+	assign		___352_i $const5 	%argrw{"wr"}
+	arraylength	$tmp112 spheres 	%argrw{"wr"}
+	lt		$tmp113 ___352_i $tmp112 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:50
+#             if(closest_dist > d){
+	functioncall	$const12 224 	%line{50} %argrw{"r"}
+# /snap/blender/36/2.82/scripts/addons/cycles/shader/stdosl.h:195
+#   return a - b * floor(a / b);
+	div		$tmp117 $tmp111 $const11 	%filename{"/snap/blender/36/2.82/scripts/addons/cycles/shader/stdosl.h"} %line{195} %argrw{"wrr"}
+	floor		$tmp116 $tmp117 	%argrw{"wr"}
+	mul		$tmp118 $const11 $tmp116 	%argrw{"wrr"}
+	sub		$tmp115 $tmp111 $tmp118 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:50
+#             if(closest_dist > d){
+	aref		$tmp119 spheres.m_position ___352_i 	%filename{"Workspace/OSL-Experiments/OSL/Houdini/march.osl"} %line{50} %argrw{"wrr"}
+	distance	$tmp114 $tmp115 $tmp119 	%argrw{"wrr"}
+	aref		$tmp120 spheres.m_radius ___352_i 	%argrw{"wrr"}
+	sub		___353_d $tmp114 $tmp120 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:51
+#                 closest_dist = d;
+	gt		$tmp121 ___351_closest_dist ___353_d 	%line{51} %argrw{"wrr"}
+	if		$tmp121 233 233 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:52
+#                 hit_color = spheres[i].m_color;
+	assign		___351_closest_dist ___353_d 	%line{52} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:53
+#             }
+	aref		$tmp122 spheres.m_color ___352_i 	%line{53} %argrw{"wrr"}
+	assign		hit_color $tmp122 	%argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:49
+#             float d = distance(mod(march_edge, 0.4), spheres[i].m_position)-spheres[i].m_radius;
+	assign		$tmp123 ___352_i 	%line{49} %argrw{"wr"}
+	add		___352_i ___352_i $const13 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:57
+#         
+	compref		$tmp124 $tmp111 $const13 	%line{57} %argrw{"wrr"}
+	add		___351_plane_dist $tmp124 $const14 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:60
+#             closest_dist = plane_dist;
+	lt		$tmp125 ___351_plane_dist ___351_closest_dist 	%line{60} %argrw{"wrr"}
+	if		$tmp125 241 241 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:61
+#             hit_color = color(0.1, 0.4, 0.1);
+	assign		___351_closest_dist ___351_plane_dist 	%line{61} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:62
+#         }
+	assign		hit_color $const15 	%line{62} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:69
+#         if(cap_dist < closest_dist){
+	sub		$tmp127 $tmp111 $const16 	%line{69} %argrw{"wrr"}
+	functioncall	$const19 254 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:35
+#         tp[1] -= clamp(p[1], 0.0, h); 
+	assign		___349_tp $tmp127 	%line{35} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:36
+#         float line_dist = length(tp) - r;
+	compref		$tmp128 ___349_tp $const13 	%line{36} %argrw{"wrr"}
+	compref		$tmp130 $tmp127 $const13 	%argrw{"wrr"}
+	functioncall	$const21 249 	%argrw{"r"}
+# /snap/blender/36/2.82/scripts/addons/cycles/shader/stdosl.h:231
+#   return max(min(x, maxval), minval);
+	min		$tmp131 $tmp130 $const17 	%filename{"/snap/blender/36/2.82/scripts/addons/cycles/shader/stdosl.h"} %line{231} %argrw{"wrr"}
+	max		$tmp129 $tmp131 $const20 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:36
+#         float line_dist = length(tp) - r;
+	sub		$tmp132 $tmp128 $tmp129 	%filename{"Workspace/OSL-Experiments/OSL/Houdini/march.osl"} %line{36} %argrw{"wrr"}
+	compassign	___349_tp $const13 $tmp132 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:37
+#         return line_dist;
+	length		$tmp133 ___349_tp 	%line{37} %argrw{"wr"}
+	sub		___349_line_dist $tmp133 $const18 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:38
+#     }
+	assign		___351_cap_dist ___349_line_dist 	%line{38} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:70
+#             closest_dist = cap_dist;
+	lt		$tmp134 ___351_cap_dist ___351_closest_dist 	%line{70} %argrw{"wrr"}
+	if		$tmp134 258 258 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:71
+#             hit_color = color(0.8, 0.2, 0.1);
+	assign		___351_closest_dist ___351_cap_dist 	%line{71} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:72
+#         } 
+	assign		hit_color $const22 	%line{72} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:76
+#         if(box_dist < closest_dist){
+	sub		$tmp136 $tmp111 $const23 	%line{76} %argrw{"wrr"}
+	functioncall	$const25 265 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:42
+#     }
+	abs		$tmp139 $tmp136 	%line{42} %argrw{"wr"}
+	sub		$tmp140 $tmp139 $const24 	%argrw{"wrr"}
+	assign		$tmp141 $const20 	%argrw{"wr"}
+	max		$tmp138 $tmp140 $tmp141 	%argrw{"wrr"}
+	length		___351_box_dist $tmp138 	%argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:77
+#             closest_dist = box_dist;
+	lt		$tmp142 ___351_box_dist ___351_closest_dist 	%line{77} %argrw{"wrr"}
+	if		$tmp142 269 269 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:78
+#             hit_color = color(0.1, 0.3, 0.3);
+	assign		___351_closest_dist ___351_box_dist 	%line{78} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:79
+#         } 
+	assign		hit_color $const26 	%line{79} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:83
+#     }
+	assign		$tmp110 ___351_closest_dist 	%line{83} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:94
+#         return normalize(n);
+	sub		$tmp144 pp ___358_g 	%line{94} %argrw{"wrr"}
+	functioncall	$const9 328 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:47
+#         //test
+	assign		___351_closest_dist $const10 	%line{47} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:49
+#             float d = distance(mod(march_edge, 0.4), spheres[i].m_position)-spheres[i].m_radius;
+	for		$tmp146 275 277 291 293 	%line{49} %argrw{"r"}
+	assign		___352_i $const5 	%argrw{"wr"}
+	arraylength	$tmp145 spheres 	%argrw{"wr"}
+	lt		$tmp146 ___352_i $tmp145 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:50
+#             if(closest_dist > d){
+	functioncall	$const12 282 	%line{50} %argrw{"r"}
+# /snap/blender/36/2.82/scripts/addons/cycles/shader/stdosl.h:195
+#   return a - b * floor(a / b);
+	div		$tmp150 $tmp144 $const11 	%filename{"/snap/blender/36/2.82/scripts/addons/cycles/shader/stdosl.h"} %line{195} %argrw{"wrr"}
+	floor		$tmp149 $tmp150 	%argrw{"wr"}
+	mul		$tmp151 $const11 $tmp149 	%argrw{"wrr"}
+	sub		$tmp148 $tmp144 $tmp151 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:50
+#             if(closest_dist > d){
+	aref		$tmp152 spheres.m_position ___352_i 	%filename{"Workspace/OSL-Experiments/OSL/Houdini/march.osl"} %line{50} %argrw{"wrr"}
+	distance	$tmp147 $tmp148 $tmp152 	%argrw{"wrr"}
+	aref		$tmp153 spheres.m_radius ___352_i 	%argrw{"wrr"}
+	sub		___353_d $tmp147 $tmp153 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:51
+#                 closest_dist = d;
+	gt		$tmp154 ___351_closest_dist ___353_d 	%line{51} %argrw{"wrr"}
+	if		$tmp154 291 291 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:52
+#                 hit_color = spheres[i].m_color;
+	assign		___351_closest_dist ___353_d 	%line{52} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:53
+#             }
+	aref		$tmp155 spheres.m_color ___352_i 	%line{53} %argrw{"wrr"}
+	assign		hit_color $tmp155 	%argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:49
+#             float d = distance(mod(march_edge, 0.4), spheres[i].m_position)-spheres[i].m_radius;
+	assign		$tmp156 ___352_i 	%line{49} %argrw{"wr"}
+	add		___352_i ___352_i $const13 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:57
+#         
+	compref		$tmp157 $tmp144 $const13 	%line{57} %argrw{"wrr"}
+	add		___351_plane_dist $tmp157 $const14 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:60
+#             closest_dist = plane_dist;
+	lt		$tmp158 ___351_plane_dist ___351_closest_dist 	%line{60} %argrw{"wrr"}
+	if		$tmp158 299 299 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:61
+#             hit_color = color(0.1, 0.4, 0.1);
+	assign		___351_closest_dist ___351_plane_dist 	%line{61} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:62
+#         }
+	assign		hit_color $const15 	%line{62} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:69
+#         if(cap_dist < closest_dist){
+	sub		$tmp160 $tmp144 $const16 	%line{69} %argrw{"wrr"}
+	functioncall	$const19 312 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:35
+#         tp[1] -= clamp(p[1], 0.0, h); 
+	assign		___349_tp $tmp160 	%line{35} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:36
+#         float line_dist = length(tp) - r;
+	compref		$tmp161 ___349_tp $const13 	%line{36} %argrw{"wrr"}
+	compref		$tmp163 $tmp160 $const13 	%argrw{"wrr"}
+	functioncall	$const21 307 	%argrw{"r"}
+# /snap/blender/36/2.82/scripts/addons/cycles/shader/stdosl.h:231
+#   return max(min(x, maxval), minval);
+	min		$tmp164 $tmp163 $const17 	%filename{"/snap/blender/36/2.82/scripts/addons/cycles/shader/stdosl.h"} %line{231} %argrw{"wrr"}
+	max		$tmp162 $tmp164 $const20 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:36
+#         float line_dist = length(tp) - r;
+	sub		$tmp165 $tmp161 $tmp162 	%filename{"Workspace/OSL-Experiments/OSL/Houdini/march.osl"} %line{36} %argrw{"wrr"}
+	compassign	___349_tp $const13 $tmp165 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:37
+#         return line_dist;
+	length		$tmp166 ___349_tp 	%line{37} %argrw{"wr"}
+	sub		___349_line_dist $tmp166 $const18 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:38
+#     }
+	assign		___351_cap_dist ___349_line_dist 	%line{38} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:70
+#             closest_dist = cap_dist;
+	lt		$tmp167 ___351_cap_dist ___351_closest_dist 	%line{70} %argrw{"wrr"}
+	if		$tmp167 316 316 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:71
+#             hit_color = color(0.8, 0.2, 0.1);
+	assign		___351_closest_dist ___351_cap_dist 	%line{71} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:72
+#         } 
+	assign		hit_color $const22 	%line{72} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:76
+#         if(box_dist < closest_dist){
+	sub		$tmp169 $tmp144 $const23 	%line{76} %argrw{"wrr"}
+	functioncall	$const25 323 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:42
+#     }
+	abs		$tmp172 $tmp169 	%line{42} %argrw{"wr"}
+	sub		$tmp173 $tmp172 $const24 	%argrw{"wrr"}
+	assign		$tmp174 $const20 	%argrw{"wr"}
+	max		$tmp171 $tmp173 $tmp174 	%argrw{"wrr"}
+	length		___351_box_dist $tmp171 	%argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:77
+#             closest_dist = box_dist;
+	lt		$tmp175 ___351_box_dist ___351_closest_dist 	%line{77} %argrw{"wrr"}
+	if		$tmp175 327 327 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:78
+#             hit_color = color(0.1, 0.3, 0.3);
+	assign		___351_closest_dist ___351_box_dist 	%line{78} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:79
+#         } 
+	assign		hit_color $const26 	%line{79} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:83
+#     }
+	assign		$tmp143 ___351_closest_dist 	%line{83} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:94
+#         return normalize(n);
+	vector		$tmp76 $tmp77 $tmp110 $tmp143 	%line{94} %argrw{"wrrr"}
+	sub		___358_n ___358_d $tmp76 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:95
+#     }
+	normalize	___362_norm ___358_n 	%line{95} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:119
+#         
+	dot		$tmp177 ___362_norm ___362_li 	%line{119} %argrw{"wrr"}
+	functioncall	$const21 335 	%argrw{"r"}
+# /snap/blender/36/2.82/scripts/addons/cycles/shader/stdosl.h:231
+#   return max(min(x, maxval), minval);
+	min		$tmp178 $tmp177 $const32 	%filename{"/snap/blender/36/2.82/scripts/addons/cycles/shader/stdosl.h"} %line{231} %argrw{"wrr"}
+	max		$tmp176 $tmp178 $const20 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:119
+#         
+	mul		___362_diff $tmp176 hit_color 	%filename{"Workspace/OSL-Experiments/OSL/Houdini/march.osl"} %line{119} %argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:121
+#         if (dist_to_light < length(LIGHT_POS - p)) diff *= 0.25;
+	mul		$tmp179 ___362_norm SURFACE_DIST 	%line{121} %argrw{"wrr"}
+	mul		$tmp180 $tmp179 $const33 	%argrw{"wrr"}
+	add		$tmp181 pp $tmp180 	%argrw{"wrr"}
+	functioncall	$const8 415 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:101
+#         
+	assign		___359_dist_to_origin $const5 	%line{101} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:103
+#             vector march_edge = ray_origin + dist_to_origin * ray_direction;
+	for		$tmp182 343 344 412 414 	%line{103} %argrw{"r"}
+	assign		___360_j $const5 	%argrw{"wr"}
+	lt		$tmp182 ___360_j MAX_STEPS 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:104
+#             float ds = getDist(march_edge);
+	mul		$tmp183 ___359_dist_to_origin ___362_li 	%line{104} %argrw{"wrr"}
+	add		___361_march_edge $tmp181 $tmp183 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:105
+#             dist_to_origin += ds;
+	functioncall	$const9 403 	%line{105} %argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:47
+#         //test
+	assign		___351_closest_dist $const10 	%line{47} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:49
+#             float d = distance(mod(march_edge, 0.4), spheres[i].m_position)-spheres[i].m_radius;
+	for		$tmp185 350 352 366 368 	%line{49} %argrw{"r"}
+	assign		___352_i $const5 	%argrw{"wr"}
+	arraylength	$tmp184 spheres 	%argrw{"wr"}
+	lt		$tmp185 ___352_i $tmp184 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:50
+#             if(closest_dist > d){
+	functioncall	$const12 357 	%line{50} %argrw{"r"}
+# /snap/blender/36/2.82/scripts/addons/cycles/shader/stdosl.h:195
+#   return a - b * floor(a / b);
+	div		$tmp189 ___361_march_edge $const11 	%filename{"/snap/blender/36/2.82/scripts/addons/cycles/shader/stdosl.h"} %line{195} %argrw{"wrr"}
+	floor		$tmp188 $tmp189 	%argrw{"wr"}
+	mul		$tmp190 $const11 $tmp188 	%argrw{"wrr"}
+	sub		$tmp187 ___361_march_edge $tmp190 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:50
+#             if(closest_dist > d){
+	aref		$tmp191 spheres.m_position ___352_i 	%filename{"Workspace/OSL-Experiments/OSL/Houdini/march.osl"} %line{50} %argrw{"wrr"}
+	distance	$tmp186 $tmp187 $tmp191 	%argrw{"wrr"}
+	aref		$tmp192 spheres.m_radius ___352_i 	%argrw{"wrr"}
+	sub		___353_d $tmp186 $tmp192 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:51
+#                 closest_dist = d;
+	gt		$tmp193 ___351_closest_dist ___353_d 	%line{51} %argrw{"wrr"}
+	if		$tmp193 366 366 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:52
+#                 hit_color = spheres[i].m_color;
+	assign		___351_closest_dist ___353_d 	%line{52} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:53
+#             }
+	aref		$tmp194 spheres.m_color ___352_i 	%line{53} %argrw{"wrr"}
+	assign		hit_color $tmp194 	%argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:49
+#             float d = distance(mod(march_edge, 0.4), spheres[i].m_position)-spheres[i].m_radius;
+	assign		$tmp195 ___352_i 	%line{49} %argrw{"wr"}
+	add		___352_i ___352_i $const13 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:57
+#         
+	compref		$tmp196 ___361_march_edge $const13 	%line{57} %argrw{"wrr"}
+	add		___351_plane_dist $tmp196 $const14 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:60
+#             closest_dist = plane_dist;
+	lt		$tmp197 ___351_plane_dist ___351_closest_dist 	%line{60} %argrw{"wrr"}
+	if		$tmp197 374 374 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:61
+#             hit_color = color(0.1, 0.4, 0.1);
+	assign		___351_closest_dist ___351_plane_dist 	%line{61} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:62
+#         }
+	assign		hit_color $const15 	%line{62} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:69
+#         if(cap_dist < closest_dist){
+	sub		$tmp199 ___361_march_edge $const16 	%line{69} %argrw{"wrr"}
+	functioncall	$const19 387 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:35
+#         tp[1] -= clamp(p[1], 0.0, h); 
+	assign		___349_tp $tmp199 	%line{35} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:36
+#         float line_dist = length(tp) - r;
+	compref		$tmp200 ___349_tp $const13 	%line{36} %argrw{"wrr"}
+	compref		$tmp202 $tmp199 $const13 	%argrw{"wrr"}
+	functioncall	$const21 382 	%argrw{"r"}
+# /snap/blender/36/2.82/scripts/addons/cycles/shader/stdosl.h:231
+#   return max(min(x, maxval), minval);
+	min		$tmp203 $tmp202 $const17 	%filename{"/snap/blender/36/2.82/scripts/addons/cycles/shader/stdosl.h"} %line{231} %argrw{"wrr"}
+	max		$tmp201 $tmp203 $const20 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:36
+#         float line_dist = length(tp) - r;
+	sub		$tmp204 $tmp200 $tmp201 	%filename{"Workspace/OSL-Experiments/OSL/Houdini/march.osl"} %line{36} %argrw{"wrr"}
+	compassign	___349_tp $const13 $tmp204 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:37
+#         return line_dist;
+	length		$tmp205 ___349_tp 	%line{37} %argrw{"wr"}
+	sub		___349_line_dist $tmp205 $const18 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:38
+#     }
+	assign		___351_cap_dist ___349_line_dist 	%line{38} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:70
+#             closest_dist = cap_dist;
+	lt		$tmp206 ___351_cap_dist ___351_closest_dist 	%line{70} %argrw{"wrr"}
+	if		$tmp206 391 391 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:71
+#             hit_color = color(0.8, 0.2, 0.1);
+	assign		___351_closest_dist ___351_cap_dist 	%line{71} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:72
+#         } 
+	assign		hit_color $const22 	%line{72} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:76
+#         if(box_dist < closest_dist){
+	sub		$tmp208 ___361_march_edge $const23 	%line{76} %argrw{"wrr"}
+	functioncall	$const25 398 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:42
+#     }
+	abs		$tmp211 $tmp208 	%line{42} %argrw{"wr"}
+	sub		$tmp212 $tmp211 $const24 	%argrw{"wrr"}
+	assign		$tmp213 $const20 	%argrw{"wr"}
+	max		$tmp210 $tmp212 $tmp213 	%argrw{"wrr"}
+	length		___351_box_dist $tmp210 	%argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:77
+#             closest_dist = box_dist;
+	lt		$tmp214 ___351_box_dist ___351_closest_dist 	%line{77} %argrw{"wrr"}
+	if		$tmp214 402 402 	%argrw{"r"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:78
+#             hit_color = color(0.1, 0.3, 0.3);
+	assign		___351_closest_dist ___351_box_dist 	%line{78} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:79
+#         } 
+	assign		hit_color $const26 	%line{79} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:83
+#     }
+	assign		___361_ds ___351_closest_dist 	%line{83} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:106
+#         
+	add		___359_dist_to_origin ___359_dist_to_origin ___361_ds 	%line{106} %argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:108
+#         }
+	lt		$tmp215 ___361_ds SURFACE_DIST 	%line{108} %argrw{"wrr"}
+	neq		$tmp216 $tmp215 $const5 	%argrw{"wrr"}
+	if		$tmp216 407 410 	%argrw{"r"}
+	gt		$tmp217 ___359_dist_to_origin MAX_DIST 	%argrw{"wrr"}
+	neq		$tmp218 $tmp217 $const5 	%argrw{"wrr"}
+	assign		$tmp216 $tmp218 	%argrw{"wr"}
+	if		$tmp216 412 412 	%argrw{"r"}
+	break
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:103
+#             vector march_edge = ray_origin + dist_to_origin * ray_direction;
+	assign		$tmp219 ___360_j 	%line{103} %argrw{"wr"}
+	add		___360_j ___360_j $const13 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:111
+#     }
+	assign		___362_dist_to_light ___359_dist_to_origin 	%line{111} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:122
+#         
+	sub		$tmp221 LIGHT_POS pp 	%line{122} %argrw{"wrr"}
+	length		$tmp220 $tmp221 	%argrw{"wr"}
+	lt		$tmp222 ___362_dist_to_light $tmp220 	%argrw{"wrr"}
+	if		$tmp222 420 420 	%argrw{"r"}
+	mul		___362_diff ___362_diff $const14 	%argrw{"wrr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:124
+#         //return 1.0; //temp value
+	assign		diff ___362_diff 	%line{124} %argrw{"wr"}
+# Workspace/OSL-Experiments/OSL/Houdini/march.osl:135
+#     //COLOR = getNormal(pp); //to test visualise the normals 
+	assign		COLOR diff 	%line{135} %argrw{"wr"}
+	end
