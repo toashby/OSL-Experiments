@@ -11,14 +11,16 @@ output color COLOR = 0,
 float MAX_DIST = 1000,
 float MAX_STEPS = 100,
 float SURFACE_DIST = 0.001,
-vector LIGHT_POS = vector(0.0, 5.0, 6.0)
+vector LIGHT_POS = vector(1.5, 5.8, 6.0)
 )
 {   
-    sphere spheres[nSPHERES];
-    
     color hit_color = color(1,0,0);
+
+    sphere spheres[nSPHERES];
   
-    spheres[0] = sphere(0.2, vector(0.2,0.2,0.2), vector(1,1,0));  
+    spheres[0] = sphere(0.2 + (noise("usimplex", P*10)/30),
+                        vector(0.2,0.2,0.2),
+                        vector(noise("usimplex", P*10),1,0));  
     spheres[1] = sphere(0.1, vector(0,0,0), vector(0,0,1));
 
     point CamPos;//get the camera position
@@ -27,28 +29,58 @@ vector LIGHT_POS = vector(0.0, 5.0, 6.0)
         getattribute("path:ray_length", L);
         CamPos=L*I+P;
     }
+    
+    
+    float capsuleSDF(vector p, float h, float r){
+        vector tp = p;
+        tp[1] -= clamp(p[1], 0.0, h); 
+        float line_dist = length(tp) - r;
+        return line_dist;
+    }
+    
+    float boxSDF(vector p, vector s){
+        return length(max(abs(p)-s, 0.0));
+    }
 
 
     float getDist(vector march_edge){
-        float closest_DIST = 2147483647; //max float
+        float closest_dist = 2147483647; //max float
         //test
         for(int i = 0; i < arraylength(spheres); i++){
             float d = distance(march_edge, spheres[i].m_position)-spheres[i].m_radius;
-            if(closest_DIST > d){
-                closest_DIST = d;
+            if(closest_dist > d){
+                closest_dist = d;
                 hit_color = spheres[i].m_color;
             }
         }
         
-        float plane_dist = march_edge[1]; // y pos, this is the sdf for plane
+        float plane_dist = march_edge[1]+0.25; // y pos, this is the sdf for plane
         
-        //closest_DIST = min(closest_DIST, plane_dist);
-        if(plane_dist < closest_DIST){
-            closest_DIST = plane_dist;
+        //closest_dist = min(closest_dist, plane_dist);
+        if(plane_dist < closest_dist){
+            closest_dist = plane_dist;
             hit_color = color(0.1, 0.4, 0.1);
         }
         
-        return closest_DIST;
+        
+        //add more shapes here!
+        
+        //vertical capsule!
+        float cap_dist = capsuleSDF(march_edge - vector(0, 0.2, -0.2), 0.15, 0.05);
+        if(cap_dist < closest_dist){
+            closest_dist = cap_dist;
+            hit_color = color(0.8, 0.2, 0.1);
+        } 
+        
+        //box!
+        float box_dist = boxSDF(march_edge - vector(-0.3,-0.15,0.2), vector(0.1, 0.1, 0.1));
+        if(box_dist < closest_dist){
+            closest_dist = box_dist;
+            hit_color = color(0.1, 0.3, 0.3);
+        } 
+        
+        
+        return closest_dist;
     }
 
 
@@ -87,7 +119,7 @@ vector LIGHT_POS = vector(0.0, 5.0, 6.0)
         color diff = clamp(dot(norm, li), 0.0, 1.0) * (hit_color);
         
         float dist_to_light = rayMarch(p + norm * SURFACE_DIST*2.0, li); // add a small amount to p so the march loop doesn't break immediately
-        if (dist_to_light < length(LIGHT_POS - p)) diff *= 0.1;
+        if (dist_to_light < length(LIGHT_POS - p)) diff *= 0.25;
         
         return diff;
         //return 1.0; //temp value
