@@ -1,0 +1,105 @@
+#define nSPHERES 2
+
+struct sphere{
+    float m_radius; 
+    vector m_position;
+    color m_color;
+};
+
+shader Example(
+output color COLOR = 0,
+float MAX_DIST = 1000,
+float MAX_STEPS = 100,
+float SURFACE_DIST = 0.001,
+vector LIGHT_POS = vector(0.0, 5.0, 6.0)
+)
+{   
+    sphere spheres[nSPHERES];
+    
+    color hit_color = color(1,0,0);
+  
+    spheres[0] = sphere(0.2, vector(0.2,0.2,0.2), vector(1,1,0));  
+    spheres[1] = sphere(0.1, vector(0,0,0), vector(0,0,1));
+
+    point CamPos;//get the camera position
+    float L;
+    if (raytype("camera")){
+        getattribute("path:ray_length", L);
+        CamPos=L*I+P;
+    }
+
+
+    float getDist(vector march_edge){
+        float closest_DIST = 2147483647; //max float
+        //test
+        for(int i = 0; i < arraylength(spheres); i++){
+            float d = distance(march_edge, spheres[i].m_position)-spheres[i].m_radius;
+            if(closest_DIST > d){
+                closest_DIST = d;
+                hit_color = spheres[i].m_color;
+            }
+        }
+        
+        float plane_dist = march_edge[1]; // y pos, this is the sdf for plane
+        
+        //closest_DIST = min(closest_DIST, plane_dist);
+        if(plane_dist < closest_DIST){
+            closest_DIST = plane_dist;
+            hit_color = color(0.1, 0.4, 0.1);
+        }
+        
+        return closest_DIST;
+    }
+
+
+    vector getNormal(vector p){
+        //hack
+        float d = getDist(p);
+        vector e = vector(.01, 0, 0); //Does osl support swizzle?
+        vector f = vector(0, .01, 0);
+        vector g = vector(0, 0, .01);
+
+        vector n = d - vector(getDist(p-e), getDist(p-f), getDist(p-g));
+        return normalize(n);
+    }
+
+
+    float rayMarch(vector ray_origin, vector ray_direction){
+
+        float dist_to_origin = 0;
+        
+        for(int j = 0; j < MAX_STEPS; j++){
+            vector march_edge = ray_origin + dist_to_origin * ray_direction;
+            float ds = getDist(march_edge);
+            dist_to_origin += ds;
+        
+            if(ds < SURFACE_DIST || dist_to_origin > MAX_DIST) break;
+        }
+        
+        return dist_to_origin;
+    }
+
+
+    color getLight(vector p){
+        vector li = normalize(LIGHT_POS-p); //get vector from hit pos to light
+        vector norm = getNormal(p); //get a hacky normal at hit point
+        
+        color diff = clamp(dot(norm, li), 0.0, 1.0) * (hit_color);
+        
+        float dist_to_light = rayMarch(p + norm * SURFACE_DIST*2.0, li); // add a small amount to p so the march loop doesn't break immediately
+        if (dist_to_light < length(LIGHT_POS - p)) diff *= 0.1;
+        
+        return diff;
+        //return 1.0; //temp value
+    }
+    //spheres[hit_sphere].m_color
+
+    float d = rayMarch(CamPos, I);
+    
+    //calculate normals here!
+    vector pp = CamPos + I * d;
+    color diff = getLight(pp);
+    
+    COLOR = vector(diff);
+    //COLOR = getNormal(pp); //to test visualise the normals 
+}
