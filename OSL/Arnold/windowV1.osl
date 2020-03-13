@@ -1,0 +1,195 @@
+#define nSPHERES 2
+
+struct sphere{
+    float m_radius; 
+    vector m_position;
+    color m_color;
+};
+
+shader Example(
+output color COLOR = 0,
+float MAX_DIST = 1000,
+float MAX_STEPS = 100,
+float SURFACE_DIST = 0.001,
+vector LIGHT_POS = vector(-4.7, 5.1, 10.5),
+vector WINDOW_POS = vector(0,0,0)
+)
+{   
+    color hit_color = color(1,0,1);
+    float closest_miss;
+    
+    //vector testloc;
+    //getattribute("object:location",testloc);//get this object location
+    //printf("%.2f\n", testloc);
+
+    point CamPos;//get the camera position
+    float L;
+    if (raytype("camera")){
+        getattribute("path:ray_length", L);
+        CamPos=L*I+vector(u,v,0);
+    }
+
+    sphere spheres[nSPHERES];
+  
+    spheres[0] = sphere(0.3, vector(0.4,0.4,-4), vector(1,1,0));  
+    spheres[1] = sphere(0.1, vector(0.3,0.3,-0.7), vector(0,0,1));
+    
+    
+    float capsuleSDF(vector p, float h, float r){
+        vector tp = p;
+        tp[1] -= clamp(p[1], 0.0, h); 
+        float line_dist = length(tp) - r;
+        return line_dist;
+    }
+    
+    float boxSDF(vector p, vector s){//position, size
+        return length(max(abs(p)-s, 0.0));
+    }
+
+    float sphereSDF(vector march_edge, sphere s){
+        return distance(march_edge, s.m_position)-s.m_radius;
+    }
+
+    float getDist(vector march_edge){
+        float closest_hit = 2147483647; //max float
+        for(int i = 0; i < arraylength(spheres); i++){
+            float d = sphereSDF(march_edge, spheres[i]);
+            if(closest_hit > d){
+                closest_hit = d;
+                hit_color = spheres[i].m_color;
+            }
+        }
+        
+        //add more shapes here!
+        
+        //vertical capsule!
+        float cap_dist = capsuleSDF(march_edge - vector(0.5, 0.5, -0.5), 0.15, 0.05);
+        if(cap_dist < closest_hit){
+            closest_hit = cap_dist;
+            hit_color = color(0.8, 0.2, 0.1);
+        } 
+        
+        
+        //box! left
+        float box1_dist = boxSDF(march_edge - vector(0,0.5,0.5), vector(0.1, 0.5, 6));
+        if(box1_dist < closest_hit){
+            closest_hit = box1_dist;
+            hit_color = color(0.4, 0.1, 0.1);
+        }
+        
+        //box! right
+        float box2_dist = boxSDF(march_edge - vector(1,0.5,0.5), vector(0.1, 0.5, 6));
+        if(box2_dist < closest_hit){
+            closest_hit = box2_dist;
+            hit_color = color(0.2, 0.7, 0.2);
+        } 
+        
+        //box! bottom
+        float box3_dist = boxSDF(march_edge - vector(0.5,0,0.5), vector(0.5, 0.1, 6));
+        if(box3_dist < closest_hit){
+            closest_hit = box3_dist;
+            hit_color = color(0.1, 0.1, 0.4);
+        } 
+        
+        //box! top
+        float box4_dist = boxSDF(march_edge - vector(0.5,1,0.5), vector(0.5, 0.1, 6));
+        if(box4_dist < closest_hit){
+            closest_hit = box4_dist;
+            hit_color = color(0.4, 0.4, 0.1);
+        }
+        
+        //box! back
+        float box5_dist = boxSDF(march_edge - vector(0.5,0.5,-6), vector(0.5, 0.5, 0.1));
+        if(box5_dist < closest_hit){
+            closest_hit = box5_dist;
+            hit_color = color(0.8, 0.8, 0.7);
+        }
+        
+        
+        //test a boolean cut sphere
+        sphere ts;
+        sphere tis;
+        ts = sphere(0.3, vector(-0.2,0.4,5), vector(1,1,1));
+        tis = sphere(0.3, vector(-0.4,0.4,5), vector(1,1,1));
+        float td = max
+        ((distance(march_edge, ts.m_position)-ts.m_radius),
+                       -(distance(march_edge, tis.m_position)-tis.m_radius));
+        if(td < closest_hit){
+            closest_hit = td;
+            hit_color = color(1, 1, 1);
+        }
+        
+        
+        //front wall
+        float bd = min
+        (boxSDF(march_edge - vector(-4,0,6), vector(2, 2, 0.1)),
+        boxSDF(march_edge - vector(4,0,6), vector(2, 2, 0.1)));
+        bd = min(bd, boxSDF(march_edge - vector(0,4,6), vector(6, 2, 0.1)));
+        bd = min(bd, boxSDF(march_edge - vector(0,-4,6), vector(6, 2, 0.1)));
+        
+        if(bd < closest_hit){
+            closest_hit = bd;
+            hit_color = color(1, 1, 1);
+        }
+        
+        closest_miss = closest_hit;
+        return closest_hit;
+    }
+
+
+    vector getNormal(vector p){
+        //hack
+        float d = getDist(p);
+        vector e = vector(.01, 0, 0); //Does osl support swizzle?
+        vector f = vector(0, .01, 0);
+        vector g = vector(0, 0, .01);
+
+        vector n = d - vector(getDist(p-e), getDist(p-f), getDist(p-g));
+        return normalize(n);
+    }
+
+
+    float rayMarch(vector ray_origin, vector ray_direction){
+        float dist_to_origin = 0;
+        float ds;
+        
+        for(int j = 0; j < MAX_STEPS; j++){
+            vector march_edge = ray_origin + dist_to_origin * ray_direction;
+            ds = getDist(march_edge);
+            dist_to_origin += ds;
+        
+            if(ds < SURFACE_DIST || dist_to_origin > MAX_DIST){
+                break;
+            }
+        }
+        
+        return dist_to_origin;
+    }
+
+
+    color getLight(vector p){
+        vector li = normalize(LIGHT_POS-p); //get vector from hit pos to light
+        vector norm = getNormal(p); //get a hacky normal at hit point
+        
+        color diff = clamp(dot(norm, li), 0.0, 1.0) * (hit_color);
+        
+        float dist_to_light = rayMarch(p + norm * SURFACE_DIST*1.01, li); // add small amount to p so march loop doesn't break immediately
+        if (dist_to_light < length(LIGHT_POS - p)){
+            diff *= 0.25;
+        }
+        if(dist_to_light >= length(LIGHT_POS - p)){
+            if(closest_miss < 500){
+                //diff = color(1,0,0); TODO
+            }
+        }
+        return diff;
+    }
+
+    float d = rayMarch(CamPos, I);
+    
+    //calculate normals here!
+    vector pp = CamPos + I * d;
+    color diff = getLight(pp);
+    
+    COLOR = vector(diff);
+}
