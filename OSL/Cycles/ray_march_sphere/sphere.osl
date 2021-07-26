@@ -1,0 +1,59 @@
+#define nSpheres 1
+struct sphere{point pos; float radius;};
+
+shader rays(
+    output color Color = 0,
+    vector LightPos = 0,
+    int MAX_STEPS = 100,
+    int MAX_DIST = 100,
+    float SURF_DIST = 0.001)
+{ 
+
+    point CamPos;//get the camera position
+    float L;
+    if (raytype("camera")){
+        getattribute("path:ray_length", L);
+        CamPos=L*I+P;
+    }
+
+    sphere s1; s1.pos = point(0,0,0); s1.radius = 1.5
+    ; //sun
+
+    sphere spheres[nSpheres];
+    spheres[0] = s1;
+
+    float getDist(vector pp){ //i need pp, point on edge of sphere /// i need sphere pos
+        return (distance(spheres[0].pos, pp) - spheres[0].radius);
+    }
+
+    float qHit(point p, vector d, sphere s){ //query hit function
+        float dO = 0.0; //How far we have marched from the origin
+        for(int i = 0; i < MAX_STEPS; i++){
+            vector pp = p + dO * d; //calculate the point on the edge of the marched sphere
+
+            float ds = getDist(pp); //distance to the scene(object)
+
+            dO += ds;
+
+            if(ds < SURF_DIST || dO > MAX_DIST) break;
+
+        }
+        return dO; //ray intersects
+    }
+
+    float wasHit;
+    float tempHit = 999999999;
+    int closestRec;
+    //Color = color(1,0,0);
+    for(int i = 0; i < nSpheres; ++i){
+        wasHit = qHit(CamPos, -I, spheres[i]);
+        //Color = color(1,0,0);
+        if(wasHit < MAX_DIST && wasHit > 0){
+            tempHit = wasHit;
+            closestRec = i;
+
+            Color = noise("perlin", P*10, 10);
+            //Color = color(1,0,0);
+        }
+    }
+}
